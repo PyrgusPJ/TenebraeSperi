@@ -21,8 +21,17 @@ header h1:hover{opacity:.85}
 .mapnav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}.mapnav small{color:var(--mute)}
 .mapnav button{border-radius:50%;width:38px;height:38px;padding:0}
 .dots{display:flex;gap:8px;justify-content:center;margin-bottom:10px}.dot{width:10px;height:10px;border-radius:50%;background:var(--line);cursor:pointer}.dot.on{background:var(--accent)}
-.tb{display:flex;gap:6px;margin:6px 0 4px}.tb button{min-width:38px;padding:3px 10px}
+.tb{display:flex;gap:6px;margin:6px 0 4px;flex-wrap:wrap;align-items:center}.tsep{width:1px;height:22px;background:var(--line);margin:0 2px}
+.tb .sw{width:24px;min-width:24px;height:24px;padding:0;border-radius:50%;border:1px solid var(--line)}
+.tb input.cpick{width:34px!important;height:30px;padding:2px;cursor:pointer}.tb button{min-width:38px;padding:3px 10px}
 .view u{text-decoration-color:var(--gold);text-underline-offset:3px}
+.tok{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;border:3px solid var(--tc,var(--accent));background:var(--panel);box-shadow:0 2px 6px rgba(0,0,0,.6);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.3rem;line-height:1;z-index:3;user-select:none;-webkit-user-select:none}
+.tok.mv{touch-action:none;cursor:grab}.tok.drag{opacity:.85;cursor:grabbing;z-index:5}
+.tok img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center top;pointer-events:none}
+.tok b{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:3px;font:600 .68rem Georgia,serif;line-height:1.3;background:var(--panel);color:var(--ink);border:1px solid var(--tc,var(--accent));border-radius:4px;padding:0 4px;white-space:nowrap;pointer-events:none}
+.tcpick{width:28px!important;height:22px;padding:0!important;border:1px solid var(--line);vertical-align:middle;cursor:pointer}
+.tsw{width:26px;min-width:26px;height:26px;padding:0;border-radius:50%;border:2px solid var(--line)}.tsw.on{outline:2px solid var(--ink);outline-offset:1px}
+#modeb{font-size:1.25rem;line-height:1;padding:6px 12px}
 .hero.home{margin:18px auto 0}
 header p{margin:4px 0 0;color:var(--mute);font-style:italic;font-size:.95rem}
 .bar{display:flex;gap:10px;max-width:1100px;margin:14px auto;padding:0 16px;flex-wrap:wrap}
@@ -108,9 +117,9 @@ textarea{min-height:170px;resize:vertical}
   <div id="statbox" style="display:none"><label>Stato missione</label><select id="fst"></select></div>
   <div id="subbox" style="display:none"><label>Gruppo</label><select id="fs"></select></div>
   <label>Descrizione</label>
-  <div class="tb"><button type="button" data-fmt="fb:b" title="Grassetto (Ctrl+B)"><b>B</b></button><button type="button" data-fmt="fb:i" title="Corsivo (Ctrl+I)"><i>I</i></button><button type="button" data-fmt="fb:u" title="Sottolineato (Ctrl+U)"><u>U</u></button></div>
+  <div class="tb"><button type="button" data-fmt="fb:b" title="Grassetto (Ctrl+B)"><b>B</b></button><button type="button" data-fmt="fb:i" title="Corsivo (Ctrl+I)"><i>I</i></button><button type="button" data-fmt="fb:u" title="Sottolineato (Ctrl+U)"><u>U</u></button><span class="tsep"></span><button type="button" data-fmt="fb:sm" title="Testo più piccolo">A−</button><button type="button" data-fmt="fb:lg" title="Testo più grande">A+</button><span class="tsep"></span><button type="button" class="sw" data-fmt="fb:c:#d64541" style="background:#d64541" title="Rosso"></button><button type="button" class="sw" data-fmt="fb:c:#e08a1e" style="background:#e08a1e" title="Arancio"></button><button type="button" class="sw" data-fmt="fb:c:#c9a227" style="background:#c9a227" title="Oro"></button><button type="button" class="sw" data-fmt="fb:c:#3fa34d" style="background:#3fa34d" title="Verde"></button><button type="button" class="sw" data-fmt="fb:c:#3b8ed0" style="background:#3b8ed0" title="Azzurro"></button><button type="button" class="sw" data-fmt="fb:c:#9b59b6" style="background:#9b59b6" title="Viola"></button><input type="color" class="cpick" data-colorpick="fb" title="Altro colore" value="#d64541"><button type="button" data-fmt="fb:nc" title="Togli il colore">✕</button></div>
   <textarea id="fb"></textarea>
-  <div class="hint">Seleziona del testo e premi <b>B</b>, <i>I</i> o <u>U</u> (oppure Ctrl+B, Ctrl+I, Ctrl+U). A mano: **grassetto**, *corsivo*, __sottolineato__.</div>
+  <div class="hint">Seleziona del testo e premi i pulsanti: <b>B</b> <i>I</i> <u>U</u> (anche Ctrl+B, Ctrl+I, Ctrl+U), <b>A−</b>/<b>A+</b> per rimpicciolire o ingrandire (si possono premere più volte), i pallini o 🎨 per colorare il carattere, ✕ per togliere il colore.</div>
   <div class="hint">Per collegare un'altra voce scrivi il suo nome tra doppie quadre, ad esempio [[Nome della voce]].</div>
   <div id="imgbox"><label>Immagine (disegno, mappa, ritratto)</label><input type="file" id="ff" accept="image/*"></div>
   <div class="row"><button class="pri" id="save">Salva</button><button id="cancel">Annulla</button></div>
@@ -119,6 +128,16 @@ textarea{min-height:170px;resize:vertical}
 <dialog id="cdlg">
   <p id="cmsg" style="margin-top:0"></p>
   <div class="row"><button class="pri" id="cok">Elimina</button><button id="cno">Annulla</button></div>
+</dialog>
+
+<dialog id="tdlg">
+  <h3 style="margin-top:0">🧙 Nuovo token</h3>
+  <label>Personaggio</label><select id="te"></select>
+  <label>Oppure scrivi un nome</label><input id="tl" placeholder="es. Gruppo di mercenari">
+  <label>Colore della cornice</label>
+  <div class="row" style="margin:4px 0 8px;align-items:center;gap:6px;flex-wrap:wrap"><button type="button" class="tsw" data-tcol="#d64541" style="background:#d64541" title="Rosso"></button><button type="button" class="tsw" data-tcol="#e08a1e" style="background:#e08a1e" title="Arancio"></button><button type="button" class="tsw" data-tcol="#c9a227" style="background:#c9a227" title="Oro"></button><button type="button" class="tsw" data-tcol="#3fa34d" style="background:#3fa34d" title="Verde"></button><button type="button" class="tsw" data-tcol="#3b8ed0" style="background:#3b8ed0" title="Azzurro"></button><button type="button" class="tsw" data-tcol="#9b59b6" style="background:#9b59b6" title="Viola"></button><button type="button" class="tsw" data-tcol="#f2f2f2" style="background:#f2f2f2" title="Bianco"></button><button type="button" class="tsw" data-tcol="#222222" style="background:#222222" title="Nero"></button><input type="color" id="tcp" class="tcpick" value="#c4452b" title="Altro colore"><button type="button" class="mini" data-tcol="">↺ Predefinito</button></div>
+  <div class="hint">Il token compare al centro della mappa: trascinalo dove vuoi. Se il personaggio ha già un token, viene spostato su questa mappa.</div>
+  <div class="row"><button class="pri" id="tsave">Aggiungi</button><button id="tcancel">Annulla</button></div>
 </dialog>
 
 <dialog id="mdlg">
@@ -145,14 +164,14 @@ textarea{min-height:170px;resize:vertical}
   <label>Gruppi (per categoria)</label><div id="sgrp"></div>
   <label>Stati delle missioni</label><div id="sstat"></div>
   <label>Pagina principale (si apre cliccando sul titolo): testo sopra l'immagine</label>
-  <div class="tb"><button type="button" data-fmt="sht:b" title="Grassetto (Ctrl+B)"><b>B</b></button><button type="button" data-fmt="sht:i" title="Corsivo (Ctrl+I)"><i>I</i></button><button type="button" data-fmt="sht:u" title="Sottolineato (Ctrl+U)"><u>U</u></button></div>
+  <div class="tb"><button type="button" data-fmt="sht:b" title="Grassetto (Ctrl+B)"><b>B</b></button><button type="button" data-fmt="sht:i" title="Corsivo (Ctrl+I)"><i>I</i></button><button type="button" data-fmt="sht:u" title="Sottolineato (Ctrl+U)"><u>U</u></button><span class="tsep"></span><button type="button" data-fmt="sht:sm" title="Testo più piccolo">A−</button><button type="button" data-fmt="sht:lg" title="Testo più grande">A+</button><span class="tsep"></span><button type="button" class="sw" data-fmt="sht:c:#d64541" style="background:#d64541" title="Rosso"></button><button type="button" class="sw" data-fmt="sht:c:#e08a1e" style="background:#e08a1e" title="Arancio"></button><button type="button" class="sw" data-fmt="sht:c:#c9a227" style="background:#c9a227" title="Oro"></button><button type="button" class="sw" data-fmt="sht:c:#3fa34d" style="background:#3fa34d" title="Verde"></button><button type="button" class="sw" data-fmt="sht:c:#3b8ed0" style="background:#3b8ed0" title="Azzurro"></button><button type="button" class="sw" data-fmt="sht:c:#9b59b6" style="background:#9b59b6" title="Viola"></button><input type="color" class="cpick" data-colorpick="sht" title="Altro colore" value="#d64541"><button type="button" data-fmt="sht:nc" title="Togli il colore">✕</button></div>
   <textarea id="sht" style="min-height:110px" placeholder="Testo di benvenuto, riassunto della campagna, regole della casa…"></textarea>
   <div class="hint">Anche qui puoi collegare le voci con [[Nome della voce]].</div>
   <div class="row" style="margin:4px 0 12px;align-items:center"><span class="hint" style="margin:0">Allineamento:</span><select id="sha1" style="width:auto"><option value="left">Sinistra</option><option value="center">Centro</option><option value="right">Destra</option></select></div>
   <div id="shbox"><div class="row" style="margin:6px 0 10px;align-items:center"><img id="shp" alt="" style="height:44px;display:none;border-radius:4px"><input type="file" id="shf" accept="image/*" style="flex:1"><button class="mini" id="shx">Rimuovi immagine</button></div>
   <div class="row" style="margin:4px 0 12px;align-items:center"><span class="hint" style="margin:0">Allineamento:</span><select id="sha2" style="width:auto"><option value="left">Sinistra</option><option value="center">Centro</option><option value="right">Destra</option></select></div></div>
   <label>Testo sotto l'immagine (facoltativo)</label>
-  <div class="tb"><button type="button" data-fmt="sht2:b" title="Grassetto (Ctrl+B)"><b>B</b></button><button type="button" data-fmt="sht2:i" title="Corsivo (Ctrl+I)"><i>I</i></button><button type="button" data-fmt="sht2:u" title="Sottolineato (Ctrl+U)"><u>U</u></button></div>
+  <div class="tb"><button type="button" data-fmt="sht2:b" title="Grassetto (Ctrl+B)"><b>B</b></button><button type="button" data-fmt="sht2:i" title="Corsivo (Ctrl+I)"><i>I</i></button><button type="button" data-fmt="sht2:u" title="Sottolineato (Ctrl+U)"><u>U</u></button><span class="tsep"></span><button type="button" data-fmt="sht2:sm" title="Testo più piccolo">A−</button><button type="button" data-fmt="sht2:lg" title="Testo più grande">A+</button><span class="tsep"></span><button type="button" class="sw" data-fmt="sht2:c:#d64541" style="background:#d64541" title="Rosso"></button><button type="button" class="sw" data-fmt="sht2:c:#e08a1e" style="background:#e08a1e" title="Arancio"></button><button type="button" class="sw" data-fmt="sht2:c:#c9a227" style="background:#c9a227" title="Oro"></button><button type="button" class="sw" data-fmt="sht2:c:#3fa34d" style="background:#3fa34d" title="Verde"></button><button type="button" class="sw" data-fmt="sht2:c:#3b8ed0" style="background:#3b8ed0" title="Azzurro"></button><button type="button" class="sw" data-fmt="sht2:c:#9b59b6" style="background:#9b59b6" title="Viola"></button><input type="color" class="cpick" data-colorpick="sht2" title="Altro colore" value="#d64541"><button type="button" data-fmt="sht2:nc" title="Togli il colore">✕</button></div>
   <textarea id="sht2" style="min-height:90px" placeholder="Altro testo, mostrato dopo l'immagine…"></textarea>
   <div class="row" style="margin:4px 0 12px;align-items:center"><span class="hint" style="margin:0">Allineamento:</span><select id="sha3" style="width:auto"><option value="left">Sinistra</option><option value="center">Centro</option><option value="right">Destra</option></select></div>
   <div id="slbox"><label>Logo (in alto a destra)</label>
@@ -176,7 +195,7 @@ textarea{min-height:170px;resize:vertical}
 const CATS={"pg":["🛡","PG"],"npc":["🎭","NPC"],"luoghi":["🏰","Luoghi di interesse"],"assoc":["🕯","Associazioni"],"missioni":["📜","Missioni"],"sessioni":["📖","Sessioni"]};
 const GROUPS={};
 const STAT={"corso":"🔥 In corso","completata":"✅ Completata","fallita":"💀 Fallita","sospesa":"⏳ In sospeso"};
-let downloads=null,entries=[],pins=[],maps=[],curMap=null,mapImg="",placing=false,pend=null,cat="home",sub="all",cur=null,editId=null,db=null,assets=null,canWrite=true;
+let downloads=null,tdrag=null,suppressClick=false,entries=[],pins=[],maps=[],tokens=[],curMap=null,mapImg="",placing=false,pend=null,cat="home",sub="all",cur=null,editId=null,db=null,assets=null,canWrite=true;
 const ask=msg=>new Promise(res=>{const d=$("cdlg");$("cmsg").textContent=msg;$("cok").onclick=()=>{d.close();res(true)};$("cno").onclick=()=>{d.close();res(false)};d.oncancel=()=>res(false);d.showModal()});
 let sayT=null;
 const say=m=>{const t=$("st");t.textContent=m;t.style.color="var(--accent)";clearTimeout(sayT);sayT=setTimeout(()=>{t.textContent="";t.style.color=""},6000)};
@@ -194,7 +213,7 @@ const linksOf=t=>[...String(t||"").matchAll(/\[\[([^\]]+)\]\]/g)].map(m=>m[1]);
 let cfgRaw=null;
 const byName=n=>entries.find(e=>fold(e.name)===fold(n));
 
-const plain=t=>String(t||"").replace(/\[\[|\]\]/g,"").replace(/\*+|__/g,"");
+const plain=t=>String(t||"").replace(/\[\/?(?:color(?:=#[0-9a-fA-F]{3,6})?|tiny|small|big|huge)\]/g,"").replace(/\[\[|\]\]/g,"").replace(/\*+|__/g,"");
 function body(t){
   const s=String(t||"");let o="",last=0;
   for(const m of s.matchAll(/\[\[([^\]]+)\]\]/g)){
@@ -204,6 +223,8 @@ function body(t){
     last=m.index+m[0].length;
   }
   return (o+esc(s.slice(last)))
+    .replace(/\[color=(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6})\](.*?)\[\/color\]/g,'<span style="color:$1">$2</span>')
+    .replace(/\[(tiny|small|big|huge)\](.*?)\[\/\1\]/g,(m,k,x)=>`<span style="font-size:${{tiny:.7,small:.85,big:1.3,huge:1.7}[k]}em">${x}</span>`)
     .replace(/\*\*\*([^\s*](?:[^*\n]*?[^\s*])?)\*\*\*/g,"<b><i>$1</i></b>")
     .replace(/\*\*([^\s*](?:[^*\n]*?[^\s*])?)\*\*/g,"<b>$1</b>")
     .replace(/__([^\s_](?:[^_\n]*?[^\s_])?)__/g,"<u>$1</u>")
@@ -220,6 +241,26 @@ function wrapSel(id,mk){
   t.value=v.slice(0,a)+out+v.slice(b);t.focus();t.setSelectionRange(a,a+out.length);
 }
 const FMT={b:"**",i:"*",u:"__"};
+const SZ=["tiny","small","","big","huge"];
+function retag(id,kind,make){
+  const t=$(id);let a=t.selectionStart,b=t.selectionEnd,v=t.value;
+  const OP=kind==="color"?"\\[color=#[0-9a-fA-F]{3,6}\\]":"\\[(?:tiny|small|big|huge)\\]";
+  const CL=kind==="color"?"\\[\\/color\\]":"\\[\\/(?:tiny|small|big|huge)\\]";
+  if(a===b){const r=make(null);if(!r)return;const ph="testo";t.value=v.slice(0,a)+r[0]+ph+r[1]+v.slice(b);t.focus();t.setSelectionRange(a+r[0].length,a+r[0].length+ph.length);return}
+  let sel=v.slice(a,b),cur=null;
+  const mo=sel.match(new RegExp("^"+OP)),mc=sel.match(new RegExp(CL+"$"));
+  if(mo&&mc&&sel.length>=mo[0].length+mc[0].length){cur=mo[0];sel=sel.slice(mo[0].length,sel.length-mc[0].length)}
+  else{
+    const eo=v.slice(0,a).match(new RegExp(OP+"$")),ec=v.slice(b).match(new RegExp("^"+CL));
+    if(eo&&ec){cur=eo[0];a-=eo[0].length;b+=ec[0].length}
+  }
+  const r=make(cur);
+  const out=r?sel.split("\n").map(l=>l.trim()?l.replace(/^(\s*)([\s\S]*?)(\s*)$/,(m,x,y,z)=>x+r[0]+y+r[1]+z):l).join("\n"):sel;
+  t.value=v.slice(0,a)+out+v.slice(b);t.focus();t.setSelectionRange(a,a+out.length);
+}
+const sizeSel=(id,d)=>retag(id,"size",cur=>{const lv=cur?SZ.indexOf(cur.slice(1,-1))-2:0,n=Math.max(-2,Math.min(2,lv+d)),nm=SZ[n+2];return nm?["["+nm+"]","[/"+nm+"]"]:null});
+const colorSel=(id,val)=>retag(id,"color",()=>val?["[color="+val+"]","[/color]"]:null);
+document.addEventListener("change",ev=>{const t=ev.target;if(t.matches&&t.matches("[data-colorpick]"))colorSel(t.dataset.colorpick,t.value)});
 document.addEventListener("mousedown",ev=>{if(ev.target.closest&&ev.target.closest("[data-fmt]"))ev.preventDefault()});
 ["fb","sht","sht2"].forEach(id=>$(id).addEventListener("keydown",ev=>{
   if(!(ev.ctrlKey||ev.metaKey)||ev.altKey)return;
@@ -227,7 +268,13 @@ document.addEventListener("mousedown",ev=>{if(ev.target.closest&&ev.target.close
   ev.preventDefault();wrapSel(id,FMT[k]);
 }));
 
+const HEXRE=/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$/;
+const tokCol=t=>HEXRE.test(t.color||"")?";--tc:"+t.color:"";
+const tokEntry=t=>entries.find(x=>x.id===t.entry);
+const tokLabel=t=>{const e=tokEntry(t);return e?e.name:(t.label||"Token")};
+const tokFace=t=>{const e=tokEntry(t);if(e&&e.img)return `<img src="${blob(e.img)}" alt="" draggable="false">`;if(e)return esc(ico(e));return esc(((t.label||"?").trim().charAt(0)||"?").toUpperCase())};
 function render(){
+  if(tdrag&&tdrag.moved)return;
   const q=fold($("q").value);
   const subs=cat==="missioni"?STAT:(GROUPS[cat]&&Object.keys(GROUPS[cat]).length?GROUPS[cat]:null);
   $("subtabs").innerHTML=subs?`<button class="tab ${sub==="all"?"on":""}" data-s="all">Tutte</button>`+Object.entries(subs).map(([k,l])=>`<button class="tab ${sub===k?"on":""}" data-s="${k}">${l}</button>`).join(""):"";
@@ -241,7 +288,7 @@ function render(){
     <div class="badge" style="margin-top:12px">${ico(e)} ${tag(e)}</div>
     <h2>${esc(e.name)}</h2>${e.img?`<img class="hero" src="${blob(e.img)}" alt="">`:""}
     <div>${body(e.body)}</div>
-    ${(()=>{const L=MAPS(),ms=[...new Set([e.map,...pins.filter(p=>p.entry===e.id).map(p=>p.map||"main")].filter(Boolean))].map(id=>L.find(x=>x.id===id)).filter(Boolean);return ms.length?`<div class="row">${ms.map(m=>`<button data-showmap="${esc(m.id)}">🗺 Vedi sulla mappa${ms.length>1?": "+esc(m.name):""}</button>`).join("")}</div>`:""})()}
+    ${(()=>{const L=MAPS(),ms=[...new Set([e.map,...pins.filter(p=>p.entry===e.id).map(p=>p.map||"main"),...tokens.filter(t=>t.entry===e.id).map(t=>t.map||"main")].filter(Boolean))].map(id=>L.find(x=>x.id===id)).filter(Boolean);return ms.length?`<div class="row">${ms.map(m=>`<button data-showmap="${esc(m.id)}">🗺 Vedi sulla mappa${ms.length>1?": "+esc(m.name):""}</button>`).join("")}</div>`:""})()}
     ${back.length?`<div class="back">Citato in: ${back.map(b=>`<span class="lnk" data-id="${esc(b.id)}">${esc(b.name)}</span>`).join(", ")}</div>`:""}
     ${canWrite?`<div class="row"><button data-edit="${esc(e.id)}">✎ Modifica</button><button data-del="${esc(e.id)}">🗑 Elimina</button></div>`:""}</div>`;return}
   const base=entries.filter(e=>(cat==="all"||e.cat===cat)&&(sub==="all"||e.sub===sub||e.status===sub));
@@ -253,7 +300,7 @@ function render(){
   const exact=base.filter(e=>fold(e.name)===q);
   const part=base.filter(e=>fold(e.name)!==q&&fold(e.name).includes(q)).sort((a,b)=>(fold(a.name).startsWith(q)?0:1)-(fold(b.name).startsWith(q)?0:1)||alpha(a,b));
   const seen=new Set([...exact,...part].map(e=>e.id));
-  const cited=base.filter(e=>!seen.has(e.id)&&fold(e.body).includes(q)).sort(alpha);
+  const cited=base.filter(e=>!seen.has(e.id)&&fold(plain(e.body)).includes(q)).sort(alpha);
   const sec=(t,a)=>a.length?`<h3 class="sec">${t}</h3>${grid(a)}`:"";
   out.innerHTML=(exact.length||part.length||cited.length)?
     sec("Scheda richiesta",exact)+sec(exact.length?"Altre schede con un nome simile":"Schede con un nome simile",part)+sec(exact.length?"Schede che la citano":"Schede in cui compare il testo cercato",cited):empty;
@@ -269,17 +316,18 @@ function goMap(d){const L=MAPS();if(L.length<2)return;let i=L.findIndex(x=>x.id=
 function renderMap(){
   const L=MAPS(),m=L.find(x=>x.id===curMap)||L[0];
   if(m)curMap=m.id;
-  const idx=m?L.indexOf(m):-1,mp=m?pins.filter(p=>(p.map||"main")===m.id):[];
+  const idx=m?L.indexOf(m):-1,mp=m?pins.filter(p=>(p.map||"main")===m.id):[],tk=m?tokens.filter(t=>(t.map||"main")===m.id):[];
   const lab=p=>esc(pinLabel(p));
   let h='<div class="view">';
   if(!m)h+=`<div class="empty">Nessuna mappa caricata${canWrite&&assets?". Creane una con il pulsante qui sotto.":"."}</div>`;
   else{
     if(L.length>1)h+=`<div class="mapnav"><button data-mnav="-1" aria-label="Mappa precedente">◀</button><span><b>${esc(m.name)}</b> <small>(${idx+1}/${L.length})</small></span><button data-mnav="1" aria-label="Mappa successiva">▶</button></div><div class="dots">${L.map(x=>`<span class="dot ${x.id===m.id?"on":""}" data-mgo="${esc(x.id)}" title="${esc(x.name)}"></span>`).join("")}</div>`;
     else h+=`<div class="mapnav"><span><b>${esc(m.name)}</b></span></div>`;
-    h+=`<div class="mapwrap ${placing?"placing":""}" id="mw"><img src="${blob(m.img)}" alt="${esc(m.name)}">${mp.map(p=>`<span class="pin" data-pin="${esc(p.id)}" style="left:${p.x}%;top:${p.y}%">${p.toMap?"🗺":"📍"}<b>${lab(p)}</b></span>`).join("")}</div>`;
+    h+=`<div class="mapwrap ${placing?"placing":""}" id="mw"><img src="${blob(m.img)}" alt="${esc(m.name)}">${mp.map(p=>`<span class="pin" data-pin="${esc(p.id)}" style="left:${p.x}%;top:${p.y}%">${p.toMap?"🗺":"📍"}<b>${lab(p)}</b></span>`).join("")}${tk.map(t=>`<span class="tok${canWrite?" mv":""}" data-tok="${esc(t.id)}" style="left:${t.x}%;top:${t.y}%${tokCol(t)}" title="${esc(tokLabel(t))}">${tokFace(t)}<b>${esc(tokLabel(t))}</b></span>`).join("")}</div>`;
   }
-  if(canWrite)h+=`<div class="row">${assets?`<button data-madd>➕ Nuova mappa</button>`:""}${m&&assets?`<button data-medit="${esc(m.id)}">✎ Modifica mappa</button><button data-mdel="${esc(m.id)}">🗑 Elimina mappa</button>`:""}${m?`<button class="${placing?"pri":""}" data-place>${placing?"Clicca sulla mappa… (annulla)":"📍 Aggiungi segnaposto"}</button>`:""}</div>`;
+  if(canWrite)h+=`<div class="row">${assets?`<button data-madd>➕ Nuova mappa</button>`:""}${m&&assets?`<button data-medit="${esc(m.id)}">✎ Modifica mappa</button><button data-mdel="${esc(m.id)}">🗑 Elimina mappa</button>`:""}${m?`<button class="${placing?"pri":""}" data-place>${placing?"Clicca sulla mappa… (annulla)":"📍 Aggiungi segnaposto"}</button><button data-tadd>🧙 Aggiungi token</button>`:""}</div>`;
   if(mp.length)h+=`<div class="back">Segnaposto: ${mp.map(p=>`<span class="lnk" data-pin="${esc(p.id)}">${lab(p)}</span>${canWrite?` <span data-pdel="${esc(p.id)}" style="cursor:pointer" title="Elimina">✕</span>`:""}`).join(" · ")}</div>`;
+  if(tk.length)h+=`<div class="back">Token: ${tk.map(t=>`<span class="lnk" data-tok="${esc(t.id)}">${esc(tokLabel(t))}</span>${canWrite?` <input type="color" class="tcpick" data-tcolor="${esc(t.id)}" value="${HEXRE.test(t.color||"")&&t.color.length===7?t.color:"#c4452b"}" title="Colore della cornice"> <span data-tdel="${esc(t.id)}" style="cursor:pointer" title="Elimina">✕</span>`:""}`).join(" · ")}</div>`;
   $("out").innerHTML=h+"</div>";
 }
 function openPin(){
@@ -292,11 +340,26 @@ function openPin(){
 }
 document.addEventListener("click",ev=>{
   const fb=ev.target.closest&&ev.target.closest("[data-fmt]");
-  if(fb){const [fid,fk]=fb.dataset.fmt.split(":");return wrapSel(fid,FMT[fk])}
+  if(fb){
+    const [fid,fk,fv]=fb.dataset.fmt.split(":");
+    if(fk==="sm")return sizeSel(fid,-1);
+    if(fk==="lg")return sizeSel(fid,1);
+    if(fk==="c")return colorSel(fid,fv);
+    if(fk==="nc")return colorSel(fid,null);
+    return wrapSel(fid,FMT[fk]);
+  }
   const mw=ev.target.closest("#mw");
   if(placing&&mw&&!ev.target.closest("[data-pin]")){const r=mw.getBoundingClientRect();pend={x:+((ev.clientX-r.left)/r.width*100).toFixed(2),y:+((ev.clientY-r.top)/r.height*100).toFixed(2)};return openPin()}
-  const m=ev.target.closest("[data-place],[data-pin],[data-pdel],[data-mnav],[data-mgo],[data-madd],[data-medit],[data-mdel],[data-showmap]");
+  const m=ev.target.closest("[data-tok],[data-tadd],[data-tdel],[data-place],[data-pin],[data-pdel],[data-mnav],[data-mgo],[data-madd],[data-medit],[data-mdel],[data-showmap]");
   if(m){
+    if(m.hasAttribute("data-tadd"))return openTok();
+    if(m.dataset.tdel){ask("Eliminare il token?").then(ok=>{if(ok)db.collection("tokens").doc(m.dataset.tdel).delete().catch(()=>say("Eliminazione non riuscita"))});return}
+    if(m.dataset.tok){
+      if(suppressClick)return;
+      const t=tokens.find(x=>x.id===m.dataset.tok);if(!t)return;
+      if(tokEntry(t)){cur=t.entry;scrollTo(0,0);return render()}
+      return say(tokLabel(t));
+    }
     if(m.hasAttribute("data-place")){placing=!placing;return render()}
     if(m.dataset.mnav)return goMap(+m.dataset.mnav);
     if(m.dataset.mgo){curMap=m.dataset.mgo;placing=false;return render()}
@@ -308,7 +371,7 @@ document.addEventListener("click",ev=>{
       ask(`Eliminare la mappa «${mm.name}» e i suoi segnaposto?`).then(async ok=>{
         if(!ok)return;
         try{
-          await Promise.all(pins.filter(p=>(p.map||"main")===mm.id||p.toMap===mm.id).map(p=>db.collection("pins").doc(p.id).delete()));
+          await Promise.all([...pins.filter(p=>(p.map||"main")===mm.id||p.toMap===mm.id).map(p=>db.collection("pins").doc(p.id).delete()),...tokens.filter(t=>(t.map||"main")===mm.id).map(t=>db.collection("tokens").doc(t.id).delete())]);
           await db.collection("maps").doc(mm.id).delete();curMap=null;render();
         }catch(e){say("Eliminazione non riuscita")}
       });return;
@@ -331,7 +394,7 @@ document.addEventListener("click",ev=>{
 });
 $("q").addEventListener("input",()=>{cur=null;if(cat==="home"&&$("q").value.trim())cat="all";render()});
 let tx=null,ty=null;
-document.addEventListener("touchstart",ev=>{const t=ev.touches[0];tx=t.clientX;ty=t.clientY},{passive:true});
+document.addEventListener("touchstart",ev=>{if(ev.target.closest&&ev.target.closest(".tok")){tx=null;return}const t=ev.touches[0];tx=t.clientX;ty=t.clientY},{passive:true});
 document.addEventListener("touchend",ev=>{
   if(tx===null)return;const t=ev.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;tx=null;
   if(cat==="mappa"&&!cur&&!placing&&Math.abs(dx)>60&&Math.abs(dx)>1.5*Math.abs(dy)&&!(ev.target.closest&&ev.target.closest("dialog")))goMap(dx<0?1:-1);
@@ -358,6 +421,67 @@ $("msave").onclick=async()=>{
 };
 $("pe").onchange=()=>{if($("pe").value)$("pm").value=""};
 $("pm").onchange=()=>{if($("pm").value)$("pe").value=""};
+let tcol=null;
+const markSw=()=>document.querySelectorAll("#tdlg [data-tcol]").forEach(b=>b.classList.toggle("on",tcol!==null&&b.dataset.tcol===tcol));
+$("tdlg").addEventListener("click",ev=>{const b=ev.target.closest&&ev.target.closest("[data-tcol]");if(!b)return;tcol=b.dataset.tcol;markSw()});
+$("tcp").addEventListener("input",()=>{tcol=$("tcp").value;markSw()});
+document.addEventListener("change",async ev=>{
+  const t=ev.target;if(!(t.matches&&t.matches("[data-tcolor]")))return;
+  const tk=tokens.find(x=>x.id===t.dataset.tcolor);if(!tk)return;
+  try{const {id,...rest}=tk;await db.collection("tokens").doc(tk.id).set({...rest,color:t.value,updated:Date.now()})}catch(e){say("Salvataggio non riuscito")}
+});
+function openTok(){
+  tcol=null;$("tcp").value="#c4452b";markSw();
+  const order={pg:0,npc:1};
+  const list=[...entries].sort((a,b)=>(order[a.cat]??2)-(order[b.cat]??2)||a.name.localeCompare(b.name,"it"));
+  let html='<option value="">— nessun personaggio, solo un nome —</option>',last=null;
+  list.forEach(e=>{
+    const g=order[e.cat]!==undefined?e.cat:"x";
+    if(g!==last){if(last!==null)html+="</optgroup>";html+=`<optgroup label="${esc(g==="x"?"Altre schede":(CATS[g]?CATS[g][1]:g))}">`;last=g}
+    html+=`<option value="${esc(e.id)}">${esc(e.name)}</option>`;
+  });
+  if(last!==null)html+="</optgroup>";
+  $("te").innerHTML=html;$("tl").value="";$("tdlg").showModal();
+}
+$("tcancel").onclick=()=>$("tdlg").close();
+$("tsave").onclick=async()=>{
+  const entry=$("te").value,label=$("tl").value.trim();
+  if(!entry&&!label)return $("tl").focus();
+  const ex=entry?tokens.find(t=>t.entry===entry):null,same=ex&&(ex.map||"main")===curMap;
+  const data={map:curMap,entry,label,x:same?ex.x:50,y:same?ex.y:50,color:tcol!==null?tcol:(ex?.color||""),updated:Date.now()};
+  try{
+    if(ex)await db.collection("tokens").doc(ex.id).set(data);else await db.collection("tokens").add(data);
+    $("tdlg").close();
+    say(ex?(same?"Questo personaggio ha già un token su questa mappa.":"Token spostato su questa mappa: trascinalo dove vuoi."):"Token aggiunto al centro: trascinalo dove vuoi.");
+  }catch(e){say("Salvataggio non riuscito")}
+};
+document.addEventListener("pointerdown",ev=>{
+  const t=ev.target.closest&&ev.target.closest("[data-tok]");
+  if(!t||!canWrite||placing)return;
+  const mw=t.closest("#mw");if(!mw)return;
+  tdrag={id:t.dataset.tok,el:t,mw,sx:ev.clientX,sy:ev.clientY,moved:false,x:0,y:0};
+  try{t.setPointerCapture(ev.pointerId)}catch(e){}
+});
+document.addEventListener("pointermove",ev=>{
+  if(!tdrag)return;
+  if(!tdrag.moved&&Math.hypot(ev.clientX-tdrag.sx,ev.clientY-tdrag.sy)<6)return;
+  tdrag.moved=true;tdrag.el.classList.add("drag");
+  const r=tdrag.mw.getBoundingClientRect();
+  tdrag.x=+Math.min(100,Math.max(0,(ev.clientX-r.left)/r.width*100)).toFixed(2);
+  tdrag.y=+Math.min(100,Math.max(0,(ev.clientY-r.top)/r.height*100)).toFixed(2);
+  tdrag.el.style.left=tdrag.x+"%";tdrag.el.style.top=tdrag.y+"%";
+});
+const endDrag=async ev=>{
+  if(!tdrag)return;
+  const d=tdrag;tdrag=null;d.el.classList.remove("drag");
+  if(!d.moved)return;
+  suppressClick=true;setTimeout(()=>{suppressClick=false},80);
+  const tk=tokens.find(x=>x.id===d.id);if(!tk){render();return}
+  try{const {id,...rest}=tk;await db.collection("tokens").doc(d.id).set({...rest,x:d.x,y:d.y,updated:Date.now()})}
+  catch(e){say("Spostamento non riuscito");render()}
+};
+document.addEventListener("pointerup",endDrag);
+document.addEventListener("pointercancel",()=>{if(tdrag){tdrag=null;render()}});
 $("ttl").onclick=()=>{cat="home";sub="all";cur=null;$("q").value="";render();scrollTo(0,0)};
 let curHome={text:"",img:"",text2:"",aText:"left",aImg:"left",aText2:"left"},newHomeImg=null;
 function renderHome(){
@@ -412,7 +536,7 @@ function applyColors(c){
   else["line","mute","shadow"].forEach(k=>st.removeProperty("--"+k));
 }
 const getMode=()=>{let m=null;try{m=localStorage.getItem("mode")}catch(e){}return m==="day"||m==="night"?m:(matchMedia("(prefers-color-scheme: light)").matches?"day":"night")};
-function refreshTheme(m){m=m||getMode();document.documentElement.setAttribute("data-mode",m);applyColors(curPal[m]||null);$("modeb").textContent=m==="night"?"☀ Giorno":"🌙 Notte"}
+function refreshTheme(m){m=m||getMode();document.documentElement.setAttribute("data-mode",m);applyColors(curPal[m]||null);$("modeb").textContent=m==="night"?"☀":"🌙";$("modeb").title=m==="night"?"Passa alla modalità giorno":"Passa alla modalità notte";$("modeb").setAttribute("aria-label",$("modeb").title)}
 $("modeb").onclick=()=>{const m=getMode()==="night"?"day":"night";try{localStorage.setItem("mode",m)}catch(e){}refreshTheme(m)};
 const readPick=()=>{const o={};document.querySelectorAll("#scol .pc").forEach(i=>o[i.dataset.c]=i.value);return o};
 const setPick=c=>document.querySelectorAll("#scol .pc").forEach(i=>{i.value=c[i.dataset.c]});
@@ -464,7 +588,7 @@ async function exportPublic(){
       const u=await shrinkImg(id,kind);if(u)IMGo[id]=u;else bad++;
     }
     st("Cifro i dati…");
-    const DATAo={config:cfg,entries:entries.map(e=>({...e})),pins:pins.map(p=>({...p})),maps:L.map(m=>({...m})),mapImg:"",exportedAt:Date.now()};
+    const DATAo={config:cfg,entries:entries.map(e=>({...e})),pins:pins.map(p=>({...p})),tokens:tokens.map(t=>({...t})),maps:L.map(m=>({...m})),mapImg:"",exportedAt:Date.now()};
     const enc=new TextEncoder(),salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),IT=600000;
     const km=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"]);
     const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:IT,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt"]);
@@ -570,7 +694,7 @@ async function unlock(pw){
   const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(E.iv)},key,b64(E.ct));
   const o=JSON.parse(new TextDecoder().decode(pt));
   IMG=o.IMG||{};DATA=o.DATA;canWrite=false;
-  applyConfig(DATA.config||null);entries=DATA.entries||[];pins=DATA.pins||[];maps=DATA.maps||[];mapImg=DATA.mapImg||"";
+  applyConfig(DATA.config||null);entries=DATA.entries||[];pins=DATA.pins||[];maps=DATA.maps||[];tokens=DATA.tokens||[];mapImg=DATA.mapImg||"";
   const d=DATA.exportedAt?new Date(DATA.exportedAt).toLocaleDateString("it-IT",{day:"numeric",month:"long",year:"numeric"}):"";
   $("st").textContent="Copia di sola lettura"+(d?", aggiornata al "+d:"");
   render();$("lock").style.display="none";
