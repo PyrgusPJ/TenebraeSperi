@@ -636,7 +636,7 @@ function applyConfig(c){
   $("ttl").textContent=c?.title||DEF.title;$("sbt").textContent=c?.sub??DEF.sub;
   document.title=$("ttl").textContent;fillSel();curPal=normPal(c?.colors);refreshTheme();curLogo=c?.logo||"";applyLogo(curLogo);curHome={text:c?.home?.text||"",img:c?.home?.img||"",text2:c?.home?.text2||"",aText:c?.home?.aText||"left",aImg:c?.home?.aImg||"left",aText2:c?.home?.aText2||"left"};
 }
-const srow=(k,i,n,ic)=>`<div class="srow" data-k="${esc(k)}">${ic?`<input class="ci" maxlength="4" value="${esc(i)}">`:""}<input class="cn" value="${esc(n)}">${ic?`<button type="button" class="mini mvb" data-mv="-1" title="Sposta su" aria-label="Sposta su">▲</button><button type="button" class="mini mvb" data-mv="1" title="Sposta giù" aria-label="Sposta giù">▼</button>`:""}</div>`;
+const srow=(k,i,n,ic)=>`<div class="srow" data-k="${esc(k)}">${ic?`<input class="ci" maxlength="4" value="${esc(i)}">`:""}<input class="cn" value="${esc(n)}"><button type="button" class="mini mvb" data-mv="-1" title="Sposta su" aria-label="Sposta su">▲</button><button type="button" class="mini mvb" data-mv="1" title="Sposta giù" aria-label="Sposta giù">▼</button></div>`;
 const gather=(box,ic,old)=>{const o={};box.querySelectorAll(".srow").forEach(r=>{const k=r.dataset.k;const n=r.querySelector(".cn").value.trim()||(old[k]?(ic?old[k][1]:old[k]):"");if(!n)return;o[k]=ic?[r.querySelector(".ci").value.trim()||"📖",n]:n});return o};
 const PRE={"Notte oscura":{bg:"#120e0b",panel:"#1c1511",ink:"#e6d8bd",accent:"#c4452b",gold:"#b58a35"},"Pergamena":{bg:"#e4d6b6",panel:"#f2e7cc",ink:"#2a1f14",accent:"#8c2f1b",gold:"#8f6a1a"},"Foresta":{bg:"#0d1410",panel:"#16211a",ink:"#d6e2cf",accent:"#6fa35a",gold:"#b9a14a"},"Sangue e ferro":{bg:"#110d0e",panel:"#1d1517",ink:"#e2d6d6",accent:"#d13b3b",gold:"#8d96a3"},"Gelo":{bg:"#0c1118",panel:"#141c27",ink:"#dce6f0",accent:"#5aa7d6",gold:"#9bb5c9"}};
 const CK=[["bg","Sfondo"],["panel","Schede e pannelli"],["ink","Testo"],["accent","Accento (titoli e link)"],["gold","Dettagli dorati"]];
@@ -733,7 +733,7 @@ function openSet(){
   $("sdlg").showModal();
 }
 $("setb").onclick=openSet;
-$("scats").addEventListener("click",ev=>{const b=ev.target.closest&&ev.target.closest("[data-mv]");if(!b)return;const row=b.closest(".srow"),d=+b.dataset.mv,sib=d<0?row.previousElementSibling:row.nextElementSibling;if(!sib)return;if(d<0)row.parentNode.insertBefore(row,sib);else row.parentNode.insertBefore(sib,row);b.focus()});
+$("sdlg").addEventListener("click",ev=>{const b=ev.target.closest&&ev.target.closest("[data-mv]");if(!b)return;const row=b.closest(".srow"),d=+b.dataset.mv,sib=d<0?row.previousElementSibling:row.nextElementSibling;if(!sib)return;if(d<0)row.parentNode.insertBefore(row,sib);else row.parentNode.insertBefore(sib,row);b.focus()});
 $("scancel").onclick=()=>$("sdlg").close();
 $("addcat").onclick=()=>$("scats").insertAdjacentHTML("beforeend",srow("n"+Date.now().toString(36),"📖","",1));
 $("sgrp").addEventListener("click",ev=>{const b=ev.target.closest("[data-addg]");if(b)b.parentElement.querySelector(".grows").insertAdjacentHTML("beforeend",srow("g"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),"","",0))});
