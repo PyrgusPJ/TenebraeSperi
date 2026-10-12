@@ -59,6 +59,8 @@ main{max-width:1100px;margin:16px auto 40px;padding:0 16px}
 .card p{margin:4px 0 0;color:var(--mute);font-size:.88rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .view{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;box-shadow:0 2px 8px var(--shadow)}
 .view h2{margin:.2em 0 .1em;font-size:1.8rem;color:var(--accent)}
+.edate{color:var(--mute);margin:2px 0 8px;font-size:.95rem}
+.bkg{margin:6px 0}.bkc{color:var(--gold);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;margin-right:8px}
 .view img.hero{max-width:100%;max-height:380px;border-radius:8px;border:1px solid var(--line);display:block;margin:12px 0}
 .lnk{color:var(--accent);border-bottom:1px dashed var(--accent);cursor:pointer}
 .lnk.miss{color:var(--mute);border-bottom-color:var(--mute);font-style:italic}
@@ -119,6 +121,8 @@ textarea{min-height:170px;resize:vertical}
 <dialog id="dlg">
   <h3 id="dt" style="margin-top:0">Voce</h3>
   <label>Nome</label><input id="fn">
+  <label>Data (facoltativa)</label><input type="date" id="fdate">
+  <div class="hint">Le voci con una data compaiono per prime, in ordine cronologico; le altre seguono in ordine alfabetico.</div>
   <label>Icona (un emoji, facoltativa)</label><input id="fi" maxlength="4" placeholder="es. 🐻 ⚔ 🏰">
   <label>Categoria</label><select id="fc"></select>
   <div id="mapbox"><label>Collega a una mappa (facoltativo)</label><select id="fm"></select></div>
@@ -288,6 +292,10 @@ document.addEventListener("mousedown",ev=>{if(ev.target.closest&&ev.target.close
   ev.preventDefault();wrapSel(id,FMT[k]);
 }));
 
+const DATERE=/^\d{4}-\d{2}-\d{2}$/;
+const dateOk=e=>DATERE.test(e.date||"");
+const fmtDate=(d,short)=>{const [y,m,dd]=d.split("-").map(Number);return new Date(y,m-1,dd).toLocaleDateString("it-IT",short?{day:"2-digit",month:"2-digit",year:"numeric"}:{day:"numeric",month:"long",year:"numeric"})};
+const ord=(a,b)=>{const x=dateOk(a),y=dateOk(b);if(x&&y&&a.date!==b.date)return a.date<b.date?-1:1;if(x!==y)return x?-1:1;return a.name.localeCompare(b.name,"it")};
 const HEXRE=/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$/;
 const tokCol=t=>HEXRE.test(t.color||"")?";--tc:"+t.color:"";
 const tokEntry=t=>entries.find(x=>x.id===t.entry);
@@ -334,21 +342,21 @@ function render(){
     const back=entries.filter(x=>x.id!==e.id&&linksOf(x.body).some(l=>fold(l)===fold(e.name)));
     out.innerHTML=`<div class="view"><button data-back>← Indietro</button>
     <div class="badge" style="margin-top:12px">${ico(e)} ${tag(e)}</div>
-    <h2>${esc(e.name)}</h2>${e.img?`<img class="hero" src="${blob(e.img)}" alt="">`:""}
+    <h2>${esc(e.name)}</h2>${dateOk(e)?`<div class="edate">📅 ${fmtDate(e.date)}</div>`:""}${e.img?`<img class="hero" src="${blob(e.img)}" alt="">`:""}
     <div>${body(e.body)}</div>
     ${(()=>{const L=MAPS(),ms=[...new Set([e.map,...pins.filter(p=>p.entry===e.id).map(p=>p.map||"main"),...tokens.filter(t=>t.entry===e.id).map(t=>t.map||"main")].filter(Boolean))].map(id=>L.find(x=>x.id===id)).filter(Boolean);return ms.length?`<div class="row">${ms.map(m=>`<button data-showmap="${esc(m.id)}">🗺 Vedi sulla mappa${ms.length>1?": "+esc(m.name):""}</button>`).join("")}</div>`:""})()}
-    ${back.length?`<div class="back">Citato in: ${back.map(b=>`<span class="lnk" data-id="${esc(b.id)}">${esc(b.name)}</span>`).join(", ")}</div>`:""}
+    ${back.length?`<div class="back"><div>Citato in:</div>${(()=>{const g={};back.forEach(b=>{(g[b.cat]=g[b.cat]||[]).push(b)});const ks=[...Object.keys(CATS).filter(k=>g[k]),...Object.keys(g).filter(k=>!CATS[k])];return ks.map(k=>`<div class="bkg"><span class="bkc">${CATS[k]?esc(CATS[k][0]+" "+CATS[k][1]):"Altre schede"}</span>${g[k].sort(ord).map(b=>`<span class="lnk" data-id="${esc(b.id)}">${esc(b.name)}</span>`).join(", ")}</div>`).join("")})()}</div>`:""}
     ${canWrite?`<div class="row"><button data-edit="${esc(e.id)}">✎ Modifica</button><button data-del="${esc(e.id)}">🗑 Elimina</button></div>`:""}</div>`;return}
   const base=entries.filter(e=>(cat==="all"||e.cat===cat)&&(sub==="all"||e.sub===sub||e.status===sub));
-  const card=e=>`<div class="card" data-id="${esc(e.id)}"><div class="thumb">${e.img?`<img src="${blob(e.img)}" alt="">`:ico(e)}</div><div class="t"><div class="badge">${tag(e)}</div><h3>${esc(e.name)}</h3><p>${esc(plain(e.body))}</p></div></div>`;
+  const card=e=>`<div class="card" data-id="${esc(e.id)}"><div class="thumb">${e.img?`<img src="${blob(e.img)}" alt="">`:ico(e)}</div><div class="t"><div class="badge">${tag(e)}${dateOk(e)?` · 📅 ${fmtDate(e.date,true)}`:""}</div><h3>${esc(e.name)}</h3><p>${esc(plain(e.body))}</p></div></div>`;
   const grid=a=>`<div class="grid">${a.map(card).join("")}</div>`;
   const alpha=(a,b)=>a.name.localeCompare(b.name,"it");
   const empty=`<div class="empty">Nessuna voce trovata. ${canWrite?"Creane una con “+ Nuova voce”.":""}</div>`;
-  if(!q){const list=[...base].sort(alpha);out.innerHTML=introBox()+(list.length?grid(list):empty);return}
+  if(!q){const list=[...base].sort(ord);out.innerHTML=introBox()+(list.length?grid(list):empty);return}
   const exact=base.filter(e=>fold(e.name)===q);
-  const part=base.filter(e=>fold(e.name)!==q&&fold(e.name).includes(q)).sort((a,b)=>(fold(a.name).startsWith(q)?0:1)-(fold(b.name).startsWith(q)?0:1)||alpha(a,b));
+  const part=base.filter(e=>fold(e.name)!==q&&fold(e.name).includes(q)).sort((a,b)=>(fold(a.name).startsWith(q)?0:1)-(fold(b.name).startsWith(q)?0:1)||ord(a,b));
   const seen=new Set([...exact,...part].map(e=>e.id));
-  const cited=base.filter(e=>!seen.has(e.id)&&fold(plain(e.body)).includes(q)).sort(alpha);
+  const cited=base.filter(e=>!seen.has(e.id)&&fold(plain(e.body)).includes(q)).sort(ord);
   const sec=(t,a)=>a.length?`<h3 class="sec">${t}</h3>${grid(a)}`:"";
   out.innerHTML=(exact.length||part.length||cited.length)?
     sec("Scheda richiesta",exact)+sec(exact.length?"Altre schede con un nome simile":"Schede con un nome simile",part)+sec(exact.length?"Schede che la citano":"Schede in cui compare il testo cercato",cited):empty;
@@ -703,7 +711,7 @@ async function exportPublic(){
       const u=await shrinkImg(id,kind);if(u)IMGo[id]=u;else bad++;
     }
     st("Cifro i dati…");
-    const DATAo={config:cfg,entries:entries.map(e=>({...e})),pins:pins.map(p=>({...p})),tokens:tokens.map(t=>({...t})),intro:curIntro,maps:L.map(m=>({...m})),mapImg:"",exportedAt:Date.now()};
+    const DATAo={config:cfg,entries:entries.map(({subtitle,subAlign,...e})=>e),pins:pins.map(p=>({...p})),tokens:tokens.map(t=>({...t})),intro:curIntro,maps:L.map(m=>({...m})),mapImg:"",exportedAt:Date.now()};
     const enc=new TextEncoder(),salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),IT=600000;
     const km=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"]);
     const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:IT,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt"]);
@@ -747,7 +755,7 @@ $("ssave").onclick=async()=>{
 function openEd(id,name){
   editId=id;const e=id?entries.find(x=>x.id===id):null;
   $("dt").textContent=e?"Modifica voce":"Nuova voce";
-  $("fn").value=e?e.name:(name||"");$("fc").value=e?e.cat:(CATS[cat]?cat:"npc");syncBoxes();$("fs").value=(e?e.sub:(GROUPS[$("fc").value]?.[sub]?sub:($("fc").value==="npc"?"comune":"")))||"";$("fi").value=e?.icon||"";$("fm").innerHTML=`<option value="">— nessuna —</option>`+MAPS().map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("");$("fm").value=e?.map||"";$("mapbox").style.display=MAPS().length?"block":"none";$("fst").value=e?.status||(STAT[sub]?sub:"corso");syncBoxes();$("fb").value=e?e.body||"":"";$("ff").value="";
+  $("fn").value=e?e.name:(name||"");$("fdate").value=e?.date||"";$("fc").value=e?e.cat:(CATS[cat]?cat:"npc");syncBoxes();$("fs").value=(e?e.sub:(GROUPS[$("fc").value]?.[sub]?sub:($("fc").value==="npc"?"comune":"")))||"";$("fi").value=e?.icon||"";$("fm").innerHTML=`<option value="">— nessuna —</option>`+MAPS().map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("");$("fm").value=e?.map||"";$("mapbox").style.display=MAPS().length?"block":"none";$("fst").value=e?.status||(STAT[sub]?sub:"corso");syncBoxes();$("fb").value=e?e.body||"":"";$("ff").value="";
   $("imgbox").style.display=assets?"block":"none";$("dlg").showModal();
 }
 $("add").onclick=()=>openEd(null);
@@ -755,7 +763,7 @@ $("cancel").onclick=()=>$("dlg").close();
 $("save").onclick=async()=>{
   const name=$("fn").value.trim();if(!name)return $("fn").focus();
   const old=editId?entries.find(x=>x.id===editId):null;
-  const data={name,cat:$("fc").value,sub:(GROUPS[$("fc").value]&&Object.keys(GROUPS[$("fc").value]).length)?$("fs").value:"",status:$("fc").value==="missioni"?$("fst").value:"",icon:$("fi").value.trim(),map:$("mapbox").style.display==="none"?(old?.map||""):$("fm").value,body:$("fb").value,img:old?.img||"",updated:Date.now()};
+  const data={name,date:$("fdate").value,cat:$("fc").value,sub:(GROUPS[$("fc").value]&&Object.keys(GROUPS[$("fc").value]).length)?$("fs").value:"",status:$("fc").value==="missioni"?$("fst").value:"",icon:$("fi").value.trim(),map:$("mapbox").style.display==="none"?(old?.map||""):$("fm").value,body:$("fb").value,img:old?.img||"",updated:Date.now()};
   try{
     const f=$("ff").files[0];
     if(f&&assets){const r=await assets.upload(f);data.img=r.id}
