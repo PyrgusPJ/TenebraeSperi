@@ -60,6 +60,25 @@ main{max-width:1100px;margin:16px auto 40px;padding:0 16px}
 .view{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px;box-shadow:0 2px 8px var(--shadow)}
 .view h2{margin:.2em 0 .1em;font-size:1.8rem;color:var(--accent)}
 .edate{color:var(--mute);margin:2px 0 8px;font-size:.95rem}
+.gthumbs{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.gt{position:relative;width:92px;border:2px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.gt.tk{border-color:var(--accent)}
+.gt img{width:100%;height:78px;object-fit:cover;object-position:center top;display:block}
+.gcv{position:absolute;top:3px;left:3px;font-size:.6rem;line-height:1.3;background:var(--gold);color:#000;padding:0 4px;border-radius:4px}
+.gtb{display:flex;justify-content:space-between;padding:2px}
+.gtb button{padding:0 5px;font-size:.8rem;line-height:1.5}
+.gtb button.on{background:var(--accent);color:#fff}
+.gal{margin-top:20px}.galt{color:var(--gold);font-size:.8rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.galg{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.galg img{width:100%;height:110px;object-fit:cover;object-position:center top;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;line-height:0}
+.view img.hero{cursor:zoom-in}
+dialog#lbd{padding:0;border:none;background:rgba(0,0,0,.93);width:100vw;height:100vh;max-width:100vw;max-height:100vh;color:#fff}
+dialog#lbd[open]{display:flex;align-items:center;justify-content:center}
+#lbi{max-width:94vw;max-height:86vh;object-fit:contain}
+.lbn,.lbx{position:absolute;background:rgba(0,0,0,.55);color:#fff;border:1px solid #888;border-radius:50%;width:44px;height:44px;font-size:1.2rem;padding:0;cursor:pointer}
+.lbp{left:14px;top:50%;transform:translateY(-50%)}.lbq{right:14px;top:50%;transform:translateY(-50%)}.lbx{top:14px;right:14px}
+#lbc{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:.9rem;color:#ddd}
+#lbd.single .lbn,#lbd.single #lbc{display:none}
 .spgate{text-align:center;padding:26px 10px}.spic{font-size:2.4rem;line-height:1}.spmsg{margin:10px 0 16px;font-size:1.05rem}
 .spchk{display:block;margin:6px 0;color:var(--mute);font-size:.9rem;cursor:pointer}.spchk input{width:auto;margin-right:8px}
 .spnote{color:var(--accent);font-size:.85rem;margin:2px 0 4px}
@@ -137,7 +156,10 @@ textarea{min-height:170px;resize:vertical}
   <textarea id="fb"></textarea>
   <div class="hint">Seleziona del testo e premi i pulsanti: <b>B</b> <i>I</i> <u>U</u> (anche Ctrl+B, Ctrl+I, Ctrl+U), <b>A−</b>/<b>A+</b> per rimpicciolire o ingrandire (si possono premere più volte), i pallini o 🎨 per colorare il carattere, ✕ per togliere il colore.</div>
   <div class="hint">Per collegare un'altra voce scrivi il suo nome tra doppie quadre, ad esempio [[Nome della voce]].</div>
-  <div id="imgbox"><label>Immagine (disegno, mappa, ritratto)</label><input type="file" id="ff" accept="image/*"></div>
+  <div id="imgbox"><label>Immagine di copertina (disegno, mappa, ritratto)</label><input type="file" id="ff" accept="image/*">
+  <label>Galleria (altre immagini, anche più di una)</label><input type="file" id="gf" accept="image/*" multiple>
+  <div id="gthumbs" class="gthumbs"></div>
+  <div class="hint">Qui sotto vedi la copertina e le immagini della galleria. 🧿 sceglie l'immagine del token (senza scelta, il token usa la copertina), ★ la imposta come copertina, ✕ la toglie. Le modifiche valgono dopo il "Salva".</div></div>
   <div class="row"><button class="pri" id="save">Salva</button><button id="cancel">Annulla</button></div>
 </dialog>
 
@@ -145,6 +167,8 @@ textarea{min-height:170px;resize:vertical}
   <p id="cmsg" style="margin-top:0"></p>
   <div class="row"><button class="pri" id="cok">Elimina</button><button id="cno">Annulla</button></div>
 </dialog>
+
+<dialog id="lbd"><button type="button" class="lbx" data-lbclose aria-label="Chiudi">✕</button><button type="button" class="lbn lbp" data-lbnav="-1" aria-label="Precedente">◀</button><img id="lbi" alt=""><button type="button" class="lbn lbq" data-lbnav="1" aria-label="Successiva">▶</button><div id="lbc"></div></dialog>
 
 <dialog id="idlg">
   <h3 id="idt" style="margin-top:0">Introduzione</h3>
@@ -307,7 +331,7 @@ const HEXRE=/^#[0-9a-fA-F]{3}$|^#[0-9a-fA-F]{6}$/;
 const tokCol=t=>HEXRE.test(t.color||"")?";--tc:"+t.color:"";
 const tokEntry=t=>entries.find(x=>x.id===t.entry);
 const tokLabel=t=>{const e=tokEntry(t);return e?e.name:(t.label||"Token")};
-const tokFace=t=>{const e=tokEntry(t);if(e&&e.img)return `<img src="${blob(e.img)}" alt="" draggable="false">`;if(e)return esc(ico(e));return esc(((t.label||"?").trim().charAt(0)||"?").toUpperCase())};
+const tokFace=t=>{const e=tokEntry(t),im=e&&(e.tokenImg||e.img);if(im)return `<img src="${blob(im)}" alt="" draggable="false">`;if(e)return esc(ico(e));return esc(((t.label||"?").trim().charAt(0)||"?").toUpperCase())};
 function introBox(){
   if(!CATS[cat])return "";
   const k2=sub!=="all"?cat+"|"+sub:null,t1=(curIntro[cat]||"").trim(),t2=k2?(curIntro[k2]||"").trim():"";
@@ -359,8 +383,9 @@ function render(){
     const back=entries.filter(x=>x.id!==e.id&&linksOf(x.body).some(l=>fold(l)===fold(e.name)));
     out.innerHTML=`<div class="view"><button data-back>← Indietro</button>
     <div class="badge" style="margin-top:12px">${ico(e)} ${tag(e)}</div>${e.spoiler?spoilNote(e):""}
-    <h2>${esc(e.name)}</h2>${dateOk(e)?`<div class="edate">📅 ${fmtDate(e.date)}</div>`:""}${e.img?`<img class="hero" src="${blob(e.img)}" alt="">`:""}
+    <h2>${esc(e.name)}</h2>${dateOk(e)?`<div class="edate">📅 ${fmtDate(e.date)}</div>`:""}${e.img?`<img class="hero" data-lb="0" src="${blob(e.img)}" alt="">`:""}
     <div>${body(e.body)}</div>
+    ${(e.gallery||[]).length?`<div class="gal"><div class="galt">Galleria</div><div class="galg">${e.gallery.map((id,i)=>`<img src="${blob(id)}" alt="" data-lb="${(e.img?1:0)+i}" loading="lazy">`).join("")}</div></div>`:""}
     ${(()=>{const L=MAPS(),ms=[...new Set([e.map,...pins.filter(p=>p.entry===e.id).map(p=>p.map||"main"),...tokens.filter(t=>t.entry===e.id).map(t=>t.map||"main")].filter(Boolean))].map(id=>L.find(x=>x.id===id)).filter(Boolean);return ms.length?`<div class="row">${ms.map(m=>`<button data-showmap="${esc(m.id)}">🗺 Vedi sulla mappa${ms.length>1?": "+esc(m.name):""}</button>`).join("")}</div>`:""})()}
     ${back.length?`<div class="back"><div>Citato in:</div>${(()=>{const g={};back.forEach(b=>{(g[b.cat]=g[b.cat]||[]).push(b)});const ks=[...Object.keys(CATS).filter(k=>g[k]),...Object.keys(g).filter(k=>!CATS[k])];return ks.map(k=>`<div class="bkg"><span class="bkc">${CATS[k]?esc(CATS[k][0]+" "+CATS[k][1]):"Altre schede"}</span>${g[k].sort(ord).map(b=>`<span class="lnk" data-id="${esc(b.id)}">${esc(b.name)}</span>`).join(", ")}</div>`).join("")})()}</div>`:""}
     ${canWrite?`<div class="row"><button data-edit="${esc(e.id)}">✎ Modifica</button><button data-del="${esc(e.id)}">🗑 Elimina</button></div>`:""}</div>`;return}
@@ -425,8 +450,11 @@ document.addEventListener("click",ev=>{
   if(suppressClick&&ev.target.closest&&ev.target.closest("#mw"))return;
   const mw=ev.target.closest("#mw");
   if(placing&&mw&&!ev.target.closest("[data-pin],.zbar")){const r=$("mz").getBoundingClientRect();pend={x:+((ev.clientX-r.left)/r.width*100).toFixed(2),y:+((ev.clientY-r.top)/r.height*100).toFixed(2)};return openPin()}
-  const m=ev.target.closest("[data-spgo],[data-spback],[data-sprestore],[data-intro],[data-zin],[data-zout],[data-zreset],[data-tok],[data-tadd],[data-tdel],[data-place],[data-pin],[data-pdel],[data-mnav],[data-mgo],[data-madd],[data-medit],[data-mdel],[data-showmap]");
+  const m=ev.target.closest("[data-lb],[data-lbnav],[data-lbclose],[data-spgo],[data-spback],[data-sprestore],[data-intro],[data-zin],[data-zout],[data-zreset],[data-tok],[data-tadd],[data-tdel],[data-place],[data-pin],[data-pdel],[data-mnav],[data-mgo],[data-madd],[data-medit],[data-mdel],[data-showmap]");
   if(m){
+    if(m.dataset.lbnav)return lbGo(+m.dataset.lbnav);
+    if(m.hasAttribute("data-lbclose"))return $("lbd").close();
+    if(m.dataset.lb!==undefined){const e=entries.find(x=>x.id===cur);if(!e)return;const L=[e.img,...(e.gallery||[])].filter(Boolean);return openLB(L,Math.min(+m.dataset.lb,L.length-1))}
     if(m.hasAttribute("data-spgo")){
       const e=entries.find(x=>x.id===cur);
       if($("spAll")&&$("spAll").checked)lsSet("spoilAll","1");
@@ -709,7 +737,7 @@ function shrinkImg(id,kind){
     const im=new Image();
     im.onload=()=>{
       try{
-        const L={logo:[400,200],map:[2200,2200],home:[1200,1200],card:[900,900]}[kind];
+        const L={logo:[400,200],map:[2200,2200],home:[1200,1200],card:[1100,1100]}[kind];
         const k=Math.min(1,L[0]/im.naturalWidth,L[1]/im.naturalHeight),w=Math.max(1,Math.round(im.naturalWidth*k)),h=Math.max(1,Math.round(im.naturalHeight*k));
         const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);
         if(kind==="logo")return res(c.toDataURL("image/png"));
@@ -728,7 +756,7 @@ async function exportPublic(){
   $("exgo").disabled=true;
   try{
     const cfg=cfgRaw||{},home=cfg.home||{},L=MAPS(),mapIds=new Set(L.map(m=>m.img).filter(Boolean));
-    const ids=[...new Set([...entries.map(e=>e.img),...mapIds,cfg.logo,home.img].filter(Boolean))];
+    const ids=[...new Set([...entries.flatMap(e=>[e.img,e.tokenImg,...(e.gallery||[])]),...mapIds,cfg.logo,home.img].filter(Boolean))];
     const IMGo={};let n=0,bad=0;
     for(const id of ids){
       st("Preparo le immagini "+(++n)+"/"+ids.length+"…");
@@ -777,10 +805,42 @@ $("ssave").onclick=async()=>{
   curPal=normPal(cfg.colors);curLogo=cfg.logo;applyLogo(curLogo);curHome=cfg.home;render();
   try{await db.collection("settings").doc("config").set(cfg);$("sdlg").close()}catch(e){say("Salvataggio non riuscito")}
 };
+let lb={list:[],i:0};
+function showLB(){const id=lb.list[lb.i];$("lbi").src=blob(id);$("lbc").textContent=(lb.i+1)+" / "+lb.list.length;$("lbd").classList.toggle("single",lb.list.length<2)}
+function openLB(list,i){lb={list,i};showLB();$("lbd").showModal()}
+const lbGo=d=>{if(lb.list.length<2)return;lb.i=(lb.i+d+lb.list.length)%lb.list.length;showLB()};
+$("lbd").addEventListener("click",ev=>{if(ev.target===$("lbd"))$("lbd").close()});
+document.addEventListener("keydown",ev=>{if(!$("lbd").open)return;if(ev.key==="ArrowRight")lbGo(1);else if(ev.key==="ArrowLeft")lbGo(-1)});
+let lx=null;
+$("lbd").addEventListener("touchstart",ev=>{lx=ev.touches.length===1?ev.touches[0].clientX:null},{passive:true});
+$("lbd").addEventListener("touchend",ev=>{if(lx===null)return;const dx=ev.changedTouches[0].clientX-lx;lx=null;if(Math.abs(dx)>50)lbGo(dx<0?1:-1)},{passive:true});
+let cov="",gal=[],tokSel="";
+function renderThumbs(){
+  const all=[...(cov?[cov]:[]),...gal];
+  $("gthumbs").innerHTML=all.map(id=>`<div class="gt${tokSel===id?" tk":""}"><img src="${blob(id)}" alt="">${id===cov?`<span class="gcv">Copertina</span>`:""}<div class="gtb"><button type="button" data-gtok="${esc(id)}" title="Usa come immagine del token" class="${tokSel===id?"on":""}">🧿</button>${id!==cov?`<button type="button" data-gcov="${esc(id)}" title="Imposta come copertina">★</button>`:""}<button type="button" data-gdel="${esc(id)}" title="Togli">✕</button></div></div>`).join("");
+}
+$("gthumbs").addEventListener("click",ev=>{
+  const b=ev.target.closest&&ev.target.closest("button");if(!b)return;
+  if(b.dataset.gtok){tokSel=tokSel===b.dataset.gtok?"":b.dataset.gtok}
+  else if(b.dataset.gcov){const id=b.dataset.gcov;gal=gal.filter(x=>x!==id);if(cov)gal.push(cov);cov=id}
+  else if(b.dataset.gdel){const id=b.dataset.gdel;if(id===cov)cov="";else gal=gal.filter(x=>x!==id);if(tokSel===id)tokSel=""}
+  renderThumbs();
+});
+$("ff").onchange=async()=>{
+  const f=$("ff").files[0];if(!f||!assets)return;
+  try{const r=await assets.upload(f);cov=r.id;renderThumbs()}catch(e){say("Caricamento non riuscito")}
+  $("ff").value="";
+};
+$("gf").onchange=async()=>{
+  const fs=[...$("gf").files];if(!fs.length||!assets)return;
+  for(const f of fs){try{const r=await assets.upload(f);gal.push(r.id);renderThumbs()}catch(e){say("Un'immagine non è stata caricata")}}
+  $("gf").value="";
+};
 function openEd(id,name){
   editId=id;const e=id?entries.find(x=>x.id===id):null;
   $("dt").textContent=e?"Modifica voce":"Nuova voce";
   $("fn").value=e?e.name:(name||"");$("fdate").value=e?.date||"";$("fspo").checked=!!e?.spoiler;$("fc").value=e?e.cat:(CATS[cat]?cat:"npc");syncBoxes();$("fs").value=(e?e.sub:(GROUPS[$("fc").value]?.[sub]?sub:($("fc").value==="npc"?"comune":"")))||"";$("fi").value=e?.icon||"";$("fm").innerHTML=`<option value="">— nessuna —</option>`+MAPS().map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("");$("fm").value=e?.map||"";$("mapbox").style.display=MAPS().length?"block":"none";$("fst").value=e?.status||(STAT[sub]?sub:"corso");syncBoxes();$("fb").value=e?e.body||"":"";$("ff").value="";
+  cov=e?.img||"";gal=[...(e?.gallery||[])];tokSel=e?.tokenImg||"";renderThumbs();$("ff").value="";$("gf").value="";
   $("imgbox").style.display=assets?"block":"none";$("dlg").showModal();
 }
 $("add").onclick=()=>openEd(null);
@@ -788,10 +848,8 @@ $("cancel").onclick=()=>$("dlg").close();
 $("save").onclick=async()=>{
   const name=$("fn").value.trim();if(!name)return $("fn").focus();
   const old=editId?entries.find(x=>x.id===editId):null;
-  const data={name,date:$("fdate").value,spoiler:$("fspo").checked,cat:$("fc").value,sub:(GROUPS[$("fc").value]&&Object.keys(GROUPS[$("fc").value]).length)?$("fs").value:"",status:$("fc").value==="missioni"?$("fst").value:"",icon:$("fi").value.trim(),map:$("mapbox").style.display==="none"?(old?.map||""):$("fm").value,body:$("fb").value,img:old?.img||"",updated:Date.now()};
+  const data={name,date:$("fdate").value,spoiler:$("fspo").checked,cat:$("fc").value,sub:(GROUPS[$("fc").value]&&Object.keys(GROUPS[$("fc").value]).length)?$("fs").value:"",status:$("fc").value==="missioni"?$("fst").value:"",icon:$("fi").value.trim(),map:$("mapbox").style.display==="none"?(old?.map||""):$("fm").value,body:$("fb").value,img:cov,gallery:gal,tokenImg:(tokSel&&(tokSel===cov||gal.includes(tokSel)))?tokSel:"",updated:Date.now()};
   try{
-    const f=$("ff").files[0];
-    if(f&&assets){const r=await assets.upload(f);data.img=r.id}
     const col=db.collection("entries");
     let fix=t=>t,fixed=0;
     if(editId&&old&&old.name!==name){
